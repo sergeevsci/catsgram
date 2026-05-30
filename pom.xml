@@ -4,6 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- наследуем настройки от специального родительского проекта Spring Boot   -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.14</version>
+        <relativePath/>
+    </parent>
+
     <!-- координаты артефакта проекта -->
     <groupId>ru.yandex.practicum</groupId>
     <artifactId>catsgram</artifactId>
@@ -18,6 +26,12 @@
 
     <!-- блок настройки зависимостей проекта -->
     <dependencies>
+        <!-- Зависимость для создания веб-приложений (Spring MVC, Tomcat) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -27,7 +41,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
             <scope>provided</scope>
         </dependency>
 
@@ -37,6 +50,13 @@
     <build>
         <!-- блок настройки плагинов -->
         <plugins>
+
+            <!-- Плагин для сборки исполняемого "толстого" (fat) JAR-файла -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
             <!-- конкретный плагин -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
