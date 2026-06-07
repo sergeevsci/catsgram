@@ -7,10 +7,7 @@ import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 // Указываем, что класс PostService - является бином и его
 // нужно добавить в контекст приложения
@@ -20,8 +17,37 @@ public class PostService {
     private final Map<Long, Post> posts = new HashMap<>();
     private final UserService userService;
 
-    public Collection<Post> findAll() {
-        return posts.values();
+    public Collection<Post> findAllWithFilters(Optional<String> sort, Optional<Integer> from, Optional<Integer> size) {
+
+        String sortType = sort.orElse("asc"); // по умолчанию берем по возрастанию
+
+        int offset = from.orElse(0); // сколько постов пропустить. 0
+
+        int countPosts = size.orElse(posts.size()); // сколько постов вернуть. берем оставшееся количество в коллекции
+
+        // компаратор для сортировки по дате создания
+        Comparator<Post> dateComparator = Comparator.comparing(Post::getPostDate);
+
+        // Если попросили desc, реверс компаратора
+        if ("desc".equalsIgnoreCase(sortType)) {
+            dateComparator = dateComparator.reversed();
+        }
+
+        return posts.values().stream()
+                .sorted(dateComparator) // Сортируем sortType
+                .skip(offset)           // отбрасываем первые from постов
+                .limit(countPosts)      // отбираем последовательно size постов
+                .toList();              // возвращаем результат
+    }
+
+    public Collection<Post> findAllDefault() {
+
+        int countPosts = 10;
+
+        return posts.values().stream()
+                .sorted(Comparator.comparing(Post::getPostDate).reversed()) // desc
+                .limit(countPosts) // 10
+                .toList();
     }
 
     public Optional<Post> findPostById(Long postId) {

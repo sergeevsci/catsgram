@@ -7,6 +7,7 @@ import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/posts")
@@ -21,8 +22,17 @@ public class PostController {
     }
 
     @GetMapping
-    public Collection<Post> findAll() {
-        return postService.findAll();
+    public Collection<Post> findAll(
+            @RequestParam(name = "sort") Optional<String> sort, // сортировка asc/desc, необяз параметр. null если ничего
+            @RequestParam(name = "from") Optional<Integer> from, // сколько постов пропускаем (от какого выводим)
+            @RequestParam(name = "size") Optional<Integer> size // сколько постов надо вывести
+    ) {
+        // если не задан ни один параметр вообще (тогда только size 10)
+        if (sort.isEmpty() && from.isEmpty() && size.isEmpty()) {
+            return postService.findAllDefault(); // все дефолтное
+        }
+        // если хотя бы один задан, используем только то, что пришло.
+        return postService.findAllWithFilters(sort, from, size);
     }
 
     @PostMapping
