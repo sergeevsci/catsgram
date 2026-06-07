@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
+import ru.yandex.practicum.catsgram.model.SortOrder;
 
 import java.time.Instant;
 import java.util.*;
@@ -17,27 +18,27 @@ public class PostService {
     private final Map<Long, Post> posts = new HashMap<>();
     private final UserService userService;
 
-    public Collection<Post> findAllWithFilters(Optional<String> sort, Optional<Integer> from, Optional<Integer> size) {
+    public Collection<Post> findAllWithFilters(PostFilterRequest filter) {
 
-        String sortType = sort.orElse("asc"); // по умолчанию берем по возрастанию
+        // Извлекаем значения через Optional-методы рекорда
+        SortOrder sortOrder = filter.getSortOrder().orElse(SortOrder.ASCENDING);
+        int offset = filter.getFromOptional().orElse(0);
+        int countPosts = filter.getSizeOptional().orElse(posts.size());
 
-        int offset = from.orElse(0); // сколько постов пропустить. 0
-
-        int countPosts = size.orElse(posts.size()); // сколько постов вернуть. берем оставшееся количество в коллекции
-
-        // компаратор для сортировки по дате создания
+        // Готовим компаратор по дате выхода поста
         Comparator<Post> dateComparator = Comparator.comparing(Post::getPostDate);
 
-        // Если попросили desc, реверс компаратора
-        if ("desc".equalsIgnoreCase(sortType)) {
+        // если по убыванию - реверс компаратора
+        if (sortOrder == SortOrder.DESCENDING) {
             dateComparator = dateComparator.reversed();
         }
 
+        // Фильтр
         return posts.values().stream()
-                .sorted(dateComparator) // Сортируем sortType
-                .skip(offset)           // отбрасываем первые from постов
-                .limit(countPosts)      // отбираем последовательно size постов
-                .toList();              // возвращаем результат
+                .sorted(dateComparator) // sortType Сортируем (asc или desc)
+                .skip(offset)           // offset Пропускаем первые from постов
+                .limit(countPosts)      // countPosts Ограничиваем количество (size)
+                .toList();
     }
 
     public Collection<Post> findAllDefault() {
