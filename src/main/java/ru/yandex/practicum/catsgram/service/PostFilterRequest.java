@@ -1,5 +1,6 @@
 package ru.yandex.practicum.catsgram.service;
 
+import ru.yandex.practicum.catsgram.exception.ParameterNotValidException;
 import ru.yandex.practicum.catsgram.model.SortOrder;
 
 import java.util.Optional;
@@ -10,12 +11,16 @@ public record PostFilterRequest(String sort, Integer from, Integer size) {
     public PostFilterRequest {
         // Проверяем size, если он передан
         if (size != null && size <= 0) {
-            throw new IllegalArgumentException("Размер выборки (size) должен быть больше 0");
+            throw new ParameterNotValidException(size.toString(), "Некорректный размер выборки. Размер должен быть больше нуля");
+        }
+
+        if (from != null && from < 0) {
+            throw new ParameterNotValidException(from.toString(), "Параметр from не может быть меньше нуля");
         }
 
         // Проверяем sort через enum, если он передан
         if (sort != null && SortOrder.from(sort) == null) {
-            throw new IllegalArgumentException("Допустимые значения для sort: asc, desc, ascending, descending");
+            throw new ParameterNotValidException(sort, "Допустимые значения для sort: asc, desc, ascending, descending");
         }
     }
 
