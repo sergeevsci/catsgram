@@ -11,16 +11,16 @@ public record PostFilterRequest(String sort, Integer from, Integer size) {
     public PostFilterRequest {
         // Проверяем size, если он передан
         if (size != null && size <= 0) {
-            throw new ParameterNotValidException(size.toString(), "Некорректный размер выборки. Размер должен быть больше нуля");
+            throw new ParameterNotValidException("size", "Размер должен быть больше нуля");
         }
 
         if (from != null && from < 0) {
-            throw new ParameterNotValidException(from.toString(), "Параметр from не может быть меньше нуля");
+            throw new ParameterNotValidException("from", "Начало выборки должно быть положительным числом");
         }
 
         // Проверяем sort через enum, если он передан
         if (sort != null && SortOrder.from(sort) == null) {
-            throw new ParameterNotValidException(sort, "Допустимые значения для sort: asc, desc, ascending, descending");
+            throw new ParameterNotValidException("sort", "Получено: " + sort + " должно быть: ask или desc");
         }
     }
 
