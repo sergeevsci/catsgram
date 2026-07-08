@@ -1,0 +1,38 @@
+services:
+  catsgram-app:
+    build: .
+    container_name: catsgram-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8081"
+    environment:
+      POSTGRES_DB: catsgram
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: 12345
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/catsgram
+      SPRING_DATASOURCE_USERNAME: dbuser
+      SPRING_DATASOURCE_PASSWORD: 12345
+
+  postgres:
+    image: postgres:16.1
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: catsgram
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbuser -d catsgram"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
