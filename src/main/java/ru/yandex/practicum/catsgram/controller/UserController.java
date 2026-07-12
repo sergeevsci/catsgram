@@ -3,15 +3,9 @@ package ru.yandex.practicum.catsgram.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-/*
-
-import ru.yandex.practicum.catsgram.dto.NewUserRequest;
-import ru.yandex.practicum.catsgram.dto.NewUserResponse;
-import ru.yandex.practicum.catsgram.dto.UpdateUserRequest;
-
- */
-
 import ru.yandex.practicum.catsgram.dto.UserDto;
+import ru.yandex.practicum.catsgram.exception.NotFoundException;
+import ru.yandex.practicum.catsgram.model.User;
 import ru.yandex.practicum.catsgram.service.UserService;
 
 import java.util.List;
@@ -29,19 +23,10 @@ public class UserController {
         return userService.getUsers();
     }
 
-    /*
-
-    private final UserService userService;
-
     @GetMapping("/{userId}")
     public User findById(@PathVariable long userId) {
         return userService.findUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
-    }
-
-    @GetMapping
-    public Collection<User> findAll() {
-        return userService.findAll();
     }
 
     @PostMapping
@@ -54,6 +39,4 @@ public class UserController {
     public User update(@RequestBody User newUser) {
         return userService.update(newUser);
     }
-
-     */
 }

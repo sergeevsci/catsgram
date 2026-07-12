@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import ru.yandex.practicum.catsgram.dal.ImageRepository;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.ImageFileException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
@@ -16,37 +17,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ImageService {
 
-    /*
-
-    private final Map<Long, Image> images = new HashMap<>();
-
     private final PostService postService;
+    private final ImageRepository imageRepository;
 
     private final String imageDirectory = "C:\\Users\\User\\Desktop\\newJH\\Catsgram\\images";
 
     // получение данных об изображениях указанного поста
     public List<Image> getPostImages(long postId) {
-        return images.values()
-                .stream()
-                .filter(image -> image.getPostId() == postId)
-                .collect(Collectors.toList());
+        return imageRepository.findByPostId(postId);
     }
 
     // загружаем данные указанного изображения с диска
     public ImageData getImageData(long imageId) {
-        if (!images.containsKey(imageId)) {
-            throw new NotFoundException("Изображение с id = " + imageId + " не найдено");
-        }
-        Image image = images.get(imageId);
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new NotFoundException("Изображение с id = " + imageId + " не найдено"));
         // загрузка файла с диска
         byte[] data = loadFile(image);
 
@@ -81,20 +72,15 @@ public class ImageService {
         // сохраняем изображение на диск и возвращаем путь к файлу
         Path filePath = saveFile(file, post);
 
-        // создаём объект для хранения данных изображения
-        long imageId = getNextId();
-
         // создание объекта изображения и заполнение его данными
         Image image = new Image();
-        image.setId(imageId);
         image.setFilePath(filePath.toString());
         image.setPostId(postId);
         // запоминаем название файла, которое было при его передаче
         image.setOriginalFileName(file.getOriginalFilename());
 
-        images.put(imageId, image);
-
-        return image;
+        // создаём объект для хранения данных изображения
+        return imageRepository.create(image);
     }
 
     // сохранение файла изображения
@@ -120,16 +106,4 @@ public class ImageService {
             throw new RuntimeException(e);
         }
     }
-
-    private long getNextId() {
-        long currentMaxId = images.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
-    }
-
-     */
-
 }

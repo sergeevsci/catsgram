@@ -14,11 +14,11 @@ public class PostRowMapper implements RowMapper<Post> {
     public Post mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         Post post = new Post();
         post.setId(resultSet.getLong("id"));
-        post.setAuthorId(resultSet.getLong("authorId"));
+        post.setAuthorId(resultSet.getLong("author_id"));
         post.setDescription(resultSet.getString("description"));
 
-        Timestamp publicationPost_date = resultSet.getTimestamp("publicationPost_date");
-        post.setPostDate(publicationPost_date.toInstant());
+        Timestamp postDate = resultSet.getTimestamp("post_date");
+        post.setPostDate(postDate.toInstant());
 
         return post;
     }

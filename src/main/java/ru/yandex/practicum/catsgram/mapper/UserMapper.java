@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import ru.yandex.practicum.catsgram.dto.UserDto;
 import ru.yandex.practicum.catsgram.model.User;
 
-import java.time.Instant;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserMapper {
 
