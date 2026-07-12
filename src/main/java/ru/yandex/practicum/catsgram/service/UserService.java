@@ -6,21 +6,33 @@ import ru.yandex.practicum.catsgram.exception.DuplicatedDataException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.User;
 
-import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import ru.yandex.practicum.catsgram.dal.UserRepository;
+import ru.yandex.practicum.catsgram.dto.UserDto;
+import ru.yandex.practicum.catsgram.mapper.UserMapper;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import java.time.Instant;
 
 @Service
 public class UserService {
 
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserRepository userRepository;
 
-    public Collection<User> findAll() {
-        return users.values();
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
+    public List<UserDto> getUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
+    }
+
+/*
     public User create(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new ConditionsNotMetException("Имейл должен быть указан");
@@ -94,4 +106,5 @@ public class UserService {
                 .orElse(0);
         return ++currentMaxId;
     }
+ */
 }

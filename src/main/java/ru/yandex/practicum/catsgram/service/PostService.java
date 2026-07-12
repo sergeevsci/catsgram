@@ -2,6 +2,7 @@ package ru.yandex.practicum.catsgram.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.catsgram.dal.PostRepository;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
@@ -15,8 +16,25 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-    private final Map<Long, Post> posts = new HashMap<>();
     private final UserService userService;
+
+    private final PostRepository postRepository;
+
+    public Collection<Post> findAllWithFilters(PostFilterRequest filter) {
+        SortOrder sortOrder = filter.getSortOrder().orElse(SortOrder.ASCENDING);
+        int offset = filter.getFromOptional().orElse(0);
+        int countPosts = filter.getSizeOptional().orElse(10);
+
+        return postRepository.findAll(sortOrder, offset, countPosts);
+    }
+
+    public Collection<Post> findAllDefault() {
+        return postRepository.findAll(SortOrder.DESCENDING, 0, 10);
+    }
+
+    /*
+
+    private final Map<Long, Post> posts = new HashMap<>();
 
     public Collection<Post> findAllWithFilters(PostFilterRequest filter) {
 
@@ -93,4 +111,6 @@ public class PostService {
                 .orElse(0);
         return ++currentMaxId;
     }
+
+     */
 }

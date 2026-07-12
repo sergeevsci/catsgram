@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ImageService {
 
+    /*
+
     private final Map<Long, Image> images = new HashMap<>();
 
     private final PostService postService;
@@ -127,5 +129,7 @@ public class ImageService {
                 .orElse(0);
         return ++currentMaxId;
     }
+
+     */
 
 }
