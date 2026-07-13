@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.catsgram.dto.UserDto;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
+import ru.yandex.practicum.catsgram.mapper.UserMapper;
 import ru.yandex.practicum.catsgram.model.User;
 import ru.yandex.practicum.catsgram.service.UserService;
 
@@ -24,19 +25,21 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User findById(@PathVariable long userId) {
-        return userService.findUserById(userId)
+    public UserDto findById(@PathVariable long userId) {
+        User user = userService.findUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+
+        return UserMapper.mapToUserDto(user);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
-        return userService.create(user);
+    public UserDto create(@RequestBody User user) {
+        return UserMapper.mapToUserDto(userService.create(user));
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
-        return userService.update(newUser);
+    public UserDto update(@RequestBody User newUser) {
+        return UserMapper.mapToUserDto(userService.update(newUser));
     }
 }
