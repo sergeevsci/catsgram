@@ -27,7 +27,7 @@ public class ImageService {
     private final PostService postService;
     private final ImageRepository imageRepository;
 
-    private final String imageDirectory = "C:\\Users\\User\\Desktop\\newJH\\Catsgram\\images";
+    private final String imageDirectory = "/images";
 
     // получение данных об изображениях указанного поста
     public List<Image> getPostImages(long postId) {
