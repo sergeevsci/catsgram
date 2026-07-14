@@ -42,7 +42,7 @@ public class UserService {
         }
 
         user.setRegistrationDate(Instant.now());
-        return userRepository.create(user);
+        return userRepository.save(user);
     }
 
     public User update(User newUser) {

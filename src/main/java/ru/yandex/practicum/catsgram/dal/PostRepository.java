@@ -2,13 +2,10 @@ package ru.yandex.practicum.catsgram.dal;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.model.SortOrder;
 
-import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +13,16 @@ import java.util.Optional;
 @Repository
 public class PostRepository extends BaseRepository<Post> {
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM posts WHERE id = ?";
+    private static final String INSERT_QUERY = """
+            INSERT INTO posts(author_id, description, post_date)
+            VALUES (?, ?, ?)
+            RETURNING id
+            """;
+    private static final String UPDATE_QUERY = """
+            UPDATE posts
+            SET description = ?
+            WHERE id = ?
+            """;
     private static final String FIND_BY_ID_QUERY = """
             SELECT id, description, post_date, author_id
             FROM posts
@@ -43,33 +50,19 @@ public class PostRepository extends BaseRepository<Post> {
         return findOne(FIND_BY_ID_QUERY, postId);
     }
 
-    public Post create(Post post) {
-        String sql = """
-                INSERT INTO posts (author_id, description, post_date)
-                VALUES (?, ?, ?)
-                """;
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbc.update(connection -> {
-            PreparedStatement statement = connection.prepareStatement(sql, new String[] {"id"});
-            statement.setLong(1, post.getAuthorId());
-            statement.setString(2, post.getDescription());
-            statement.setTimestamp(3, Timestamp.from(post.getPostDate()));
-            return statement;
-        }, keyHolder);
-
-        post.setId(keyHolder.getKeyAs(Long.class));
+    public Post save(Post post) {
+        long id = insert(
+                INSERT_QUERY,
+                post.getAuthorId(),
+                post.getDescription(),
+                Timestamp.from(post.getPostDate())
+        );
+        post.setId(id);
         return post;
     }
 
     public Post update(Post post) {
-        String sql = """
-                UPDATE posts
-                SET description = ?
-                WHERE id = ?
-                """;
-
-        update(sql, post.getDescription(), post.getId());
+        update(UPDATE_QUERY, post.getDescription(), post.getId());
         return post;
     }
 

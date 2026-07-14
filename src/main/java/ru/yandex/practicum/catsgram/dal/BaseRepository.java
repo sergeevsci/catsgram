@@ -27,6 +27,14 @@ public class BaseRepository<T> {
         return jdbc.query(query, mapper, params);
     }
 
+    protected long insert(String query, Object... params) {
+        Long id = jdbc.queryForObject(query, Long.class, params);
+        if (id == null) {
+            throw new InternalServerException("Не удалось сохранить данные");
+        }
+        return id;
+    }
+
     protected boolean delete(String query, long id) {
         int rowsDeleted = jdbc.update(query, id);
         return rowsDeleted > 0;

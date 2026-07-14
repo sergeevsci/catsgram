@@ -80,7 +80,7 @@ public class ImageService {
         image.setOriginalFileName(file.getOriginalFilename());
 
         // создаём объект для хранения данных изображения
-        return imageRepository.create(image);
+        return imageRepository.save(image);
     }
 
     // сохранение файла изображения

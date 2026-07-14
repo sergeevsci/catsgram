@@ -47,7 +47,7 @@ public class PostService {
                 .orElseThrow(() -> new ConditionsNotMetException("Автор с id = " + post.getAuthorId() + " не найден"));
 
         post.setPostDate(Instant.now());
-        return postRepository.create(post);
+        return postRepository.save(post);
     }
 
     public Post update(Post newPost) {
