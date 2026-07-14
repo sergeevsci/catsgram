@@ -42,4 +42,10 @@ public class UserController {
     public UserDto update(@RequestBody User newUser) {
         return UserMapper.mapToUserDto(userService.update(newUser));
     }
+
+    @DeleteMapping("/{userId}") // не удалится из-за каскада. если есть Post у User
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable long userId) {
+        userService.delete(userId);
+    }
 }

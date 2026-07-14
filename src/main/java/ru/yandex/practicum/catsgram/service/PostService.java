@@ -65,4 +65,11 @@ public class PostService {
 
         return postRepository.update(oldPost);
     }
+
+    public void delete(long postId) {
+        postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException("Пост с id = " + postId + " не найден"));
+
+        postRepository.deleteById(postId);
+    }
 }

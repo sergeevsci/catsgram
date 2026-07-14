@@ -17,6 +17,7 @@ public class UserRepository extends BaseRepository<User> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM users WHERE email = ?";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
+    private static final String DELETE_BY_ID_QUERY = "DELETE FROM users WHERE id = ?";
     private static final String EXISTS_BY_EMAIL_QUERY = "SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)";
     private static final String EXISTS_BY_EMAIL_AND_ID_NOT_QUERY = """
             SELECT COUNT(*)
@@ -77,7 +78,11 @@ public class UserRepository extends BaseRepository<User> {
                 WHERE id = ?
                 """;
 
-        jdbc.update(sql, user.getUsername(), user.getEmail(), user.getPassword(), user.getId());
+        update(sql, user.getUsername(), user.getEmail(), user.getPassword(), user.getId());
         return user;
+    }
+
+    public boolean deleteById(long userId) {
+        return delete(DELETE_BY_ID_QUERY, userId);
     }
 }

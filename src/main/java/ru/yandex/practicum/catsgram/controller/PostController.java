@@ -44,4 +44,10 @@ public class PostController {
     public Post update(@RequestBody Post newPost) {
         return postService.update(newPost);
     }
+
+    @DeleteMapping("/{postId}") // не удалится из-за каскада. если есть Image у Post
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable long postId) {
+        postService.delete(postId);
+    }
 }

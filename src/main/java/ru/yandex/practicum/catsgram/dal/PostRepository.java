@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 public class PostRepository extends BaseRepository<Post> {
+    private static final String DELETE_BY_ID_QUERY = "DELETE FROM posts WHERE id = ?";
     private static final String FIND_BY_ID_QUERY = """
             SELECT id, description, post_date, author_id
             FROM posts
@@ -68,7 +69,11 @@ public class PostRepository extends BaseRepository<Post> {
                 WHERE id = ?
                 """;
 
-        jdbc.update(sql, post.getDescription(), post.getId());
+        update(sql, post.getDescription(), post.getId());
         return post;
+    }
+
+    public boolean deleteById(long postId) {
+        return delete(DELETE_BY_ID_QUERY, postId);
     }
 }
