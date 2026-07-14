@@ -1,11 +1,10 @@
 package ru.yandex.practicum.catsgram.dal;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.catsgram.dal.mappers.UserRowMapper;
 import ru.yandex.practicum.catsgram.model.User;
 
 import java.sql.PreparedStatement;
@@ -14,31 +13,40 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
-public class UserRepository {
-    private final JdbcTemplate jdbc;
-    private final UserRowMapper mapper;
+public class UserRepository extends BaseRepository<User> {
+    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
+    private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM users WHERE email = ?";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
+    private static final String EXISTS_BY_EMAIL_QUERY = "SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)";
+    private static final String EXISTS_BY_EMAIL_AND_ID_NOT_QUERY = """
+            SELECT COUNT(*)
+            FROM users
+            WHERE LOWER(email) = LOWER(?) AND id <> ?
+            """;
+
+    public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper) {
+        super(jdbc, mapper);
+    }
 
     public List<User> findAll() {
-        String query = "SELECT * FROM users";
-        return jdbc.query(query, mapper);
+        return findMany(FIND_ALL_QUERY);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return findOne(FIND_BY_EMAIL_QUERY, email);
     }
 
     public Optional<User> findById(Long id) {
-        String sql = "SELECT * FROM users WHERE id = ?";
-        List<User> users = jdbc.query(sql, mapper, id);
-        return users.stream().findFirst();
+        return findOne(FIND_BY_ID_QUERY, id);
     }
 
     public boolean existsByEmail(String email) {
-        String sql = "SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)";
-        Integer count = jdbc.queryForObject(sql, Integer.class, email);
+        Integer count = jdbc.queryForObject(EXISTS_BY_EMAIL_QUERY, Integer.class, email);
         return count != null && count > 0;
     }
 
     public boolean existsByEmailAndIdNot(String email, Long id) {
-        String sql = "SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?) AND id <> ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, email, id);
+        Integer count = jdbc.queryForObject(EXISTS_BY_EMAIL_AND_ID_NOT_QUERY, Integer.class, email, id);
         return count != null && count > 0;
     }
 

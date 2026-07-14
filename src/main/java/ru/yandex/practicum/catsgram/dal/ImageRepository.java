@@ -1,11 +1,10 @@
 package ru.yandex.practicum.catsgram.dal;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.catsgram.dal.mappers.ImageRowMapper;
 import ru.yandex.practicum.catsgram.model.Image;
 
 import java.sql.PreparedStatement;
@@ -13,30 +12,28 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
-public class ImageRepository {
-    private final JdbcTemplate jdbc;
-    private final ImageRowMapper mapper;
+public class ImageRepository extends BaseRepository<Image> {
+    private static final String FIND_BY_POST_ID_QUERY = """
+            SELECT id, original_name, file_path, post_id
+            FROM image_storage
+            WHERE post_id = ?
+            """;
+    private static final String FIND_BY_ID_QUERY = """
+            SELECT id, original_name, file_path, post_id
+            FROM image_storage
+            WHERE id = ?
+            """;
+
+    public ImageRepository(JdbcTemplate jdbc, RowMapper<Image> mapper) {
+        super(jdbc, mapper);
+    }
 
     public List<Image> findByPostId(long postId) {
-        String sql = """
-                SELECT id, original_name, file_path, post_id
-                FROM image_storage
-                WHERE post_id = ?
-                """;
-
-        return jdbc.query(sql, mapper, postId);
+        return findMany(FIND_BY_POST_ID_QUERY, postId);
     }
 
     public Optional<Image> findById(long imageId) {
-        String sql = """
-                SELECT id, original_name, file_path, post_id
-                FROM image_storage
-                WHERE id = ?
-                """;
-
-        List<Image> images = jdbc.query(sql, mapper, imageId);
-        return images.stream().findFirst();
+        return findOne(FIND_BY_ID_QUERY, imageId);
     }
 
     public Image create(Image image) {
