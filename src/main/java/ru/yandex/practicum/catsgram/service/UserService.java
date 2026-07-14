@@ -1,16 +1,16 @@
 package ru.yandex.practicum.catsgram.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.catsgram.dal.UserRepository;
+import ru.yandex.practicum.catsgram.dto.NewUserRequest;
+import ru.yandex.practicum.catsgram.dto.UpdateUserRequest;
+import ru.yandex.practicum.catsgram.dto.UserDto;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.DuplicatedDataException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
+import ru.yandex.practicum.catsgram.mapper.UserMapper;
 import ru.yandex.practicum.catsgram.model.User;
 
-import ru.yandex.practicum.catsgram.dal.UserRepository;
-import ru.yandex.practicum.catsgram.dto.UserDto;
-import ru.yandex.practicum.catsgram.mapper.UserMapper;
-
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,55 +31,47 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public User create(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
+    public UserDto getUserById(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
+
+        return UserMapper.mapToUserDto(user);
+    }
+
+    public UserDto createUser(NewUserRequest request) {
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
             throw new ConditionsNotMetException("Имейл должен быть указан");
         }
 
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            throw new ConditionsNotMetException("Имя пользователя должно быть указано");
+        }
+
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new ConditionsNotMetException("Пароль должен быть указан");
+        }
+
         // Исправленная проверка уникальности email при создании
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicatedDataException("Этот имейл уже используется");
         }
 
-        user.setRegistrationDate(Instant.now());
-        return userRepository.save(user);
+        User user = UserMapper.mapToUser(request);
+        return UserMapper.mapToUserDto(userRepository.save(user));
     }
 
-    public User update(User newUser) {
-        if (newUser.getId() == null) {
-            throw new ConditionsNotMetException("Id должен быть указан");
-        }
-
-        User oldUser = userRepository.findById(newUser.getId())
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден"));
-
-        if (newUser.getEmail() != null) {
-            if (newUser.getEmail().isBlank()) {
-                throw new ConditionsNotMetException("Имейл не может быть пустым");
-            }
-
-            if (userRepository.existsByEmailAndIdNot(newUser.getEmail(), newUser.getId())) {
+    public UserDto updateUser(long userId, UpdateUserRequest request) {
+        if (request.hasEmail()) {
+            if (userRepository.existsByEmailAndIdNot(request.getEmail(), userId)) {
                 throw new DuplicatedDataException("Этот имейл уже используется другим пользователем");
             }
-
-            oldUser.setEmail(newUser.getEmail());
         }
 
-        if (newUser.getUsername() != null) {
-            if (newUser.getUsername().isBlank()) {
-                throw new ConditionsNotMetException("Имя пользователя не может быть пустым");
-            }
-            oldUser.setUsername(newUser.getUsername());
-        }
+        User updatedUser = userRepository.findById(userId)
+                .map(user -> UserMapper.updateUserFields(user, request))
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        if (newUser.getPassword() != null) {
-            if (newUser.getPassword().isBlank()) {
-                throw new ConditionsNotMetException("Пароль не может быть пустым");
-            }
-            oldUser.setPassword(newUser.getPassword());
-        }
-
-        return userRepository.update(oldUser);
+        return UserMapper.mapToUserDto(userRepository.update(updatedUser));
     }
 
     public Optional<User> findUserById(Long id) {
